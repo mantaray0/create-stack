@@ -40,11 +40,16 @@ jobs:
         with:
           bun-version: 1.3.5
 
+      # Deliberately without `registry-url`: that option makes setup-node write
+      # an .npmrc containing `_authToken=${NODE_AUTH_TOKEN}` and default
+      # NODE_AUTH_TOKEN to the placeholder "XXXXX-XXXXX-XXXXX-XXXXX". npm would
+      # then authenticate with that bogus token instead of exchanging an OIDC
+      # token, and the publish fails with E404. Without the option no .npmrc is
+      # written, npm falls back to the default registry and uses OIDC.
       - uses: actions/setup-node@v4
         with:
           # Trusted publishing needs Node >= 22.14.0.
           node-version: "24"
-          registry-url: https://registry.npmjs.org
 
       # Trusted publishing needs npm >= 11.5.1. Upgrading explicitly keeps the
       # release independent of whichever npm the Node image happens to bundle.
