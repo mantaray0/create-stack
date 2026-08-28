@@ -87,8 +87,8 @@ Works, but it is the slower fallback: npm clones the repo and prepares it
 specs at all.
 
 ```bash
-npx github:mantaray0/boilerplate ~/projects/my-idea
-pnpm dlx github:mantaray0/boilerplate ~/projects/my-idea
+npx github:mantaray0/create-stack ~/projects/my-idea
+pnpm dlx github:mantaray0/create-stack ~/projects/my-idea
 ```
 
 ---
@@ -268,7 +268,7 @@ package → *Settings* → *Trusted publisher* → GitHub Actions, and enter:
 | Field | Value |
 |---|---|
 | Organization or user | `mantaray0` |
-| Repository | `boilerplate` |
+| Repository | `create-stack` |
 | Workflow filename | `release.yml` — the file name only, not a path |
 | Environment | leave empty |
 
