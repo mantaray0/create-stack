@@ -274,13 +274,17 @@ package → *Settings* → *Trusted publisher* → GitHub Actions, and enter:
 
 **3. That is it.** Every later release runs unattended. Provenance is generated
 automatically in this mode, so no `--provenance` flag and no
-`NPM_CONFIG_PROVENANCE` are needed. If an `NPM_TOKEN` secret still exists in the
-repository, delete it — `changesets/action` prefers a token when it finds one
-and would fall back to the path that is being retired.
+`NPM_CONFIG_PROVENANCE` are needed.
 
 Requirements the workflow already satisfies: `id-token: write`, a cloud-hosted
 runner, Node >= 22.14.0 and npm >= 11.5.1. Renaming `release.yml` breaks
 publishing until the trusted publisher entry is updated to match.
+
+Save the entry after filling it in — npm does not validate a trusted publisher
+configuration when it is stored, and a missing or mistyped field is invisible
+until a release fails. It then fails as a bare `ENEEDAUTH`, because npm's OIDC
+helper is written never to throw. The release workflow replays the exchange on
+failure and prints the registry's actual objection.
 
 ---
 
