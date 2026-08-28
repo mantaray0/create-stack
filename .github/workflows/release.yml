@@ -75,3 +75,17 @@ jobs:
           # No NPM_TOKEN on purpose: changesets/action falls back to trusted
           # publishing via OIDC when it finds none. Provenance is generated
           # automatically in that mode, so NPM_CONFIG_PROVENANCE is not needed.
+
+      # Guard against npm/GitHub drift: a version on npm without a matching git
+      # tag means a publish bypassed `changeset publish` (the 0.1.0 incident —
+      # manual `npm publish` shipped without tag or GitHub release). Fail loudly
+      # instead of letting the gap go unnoticed.
+      - name: Verify the published version has a git tag
+        run: |
+          tag="$(node -p 'const p=require("./package.json");`${p.name}@${p.version}`')"
+          git fetch --tags origin
+          if ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "::error::$tag is on npm but has no git tag. Recover with: bunx changeset tag && git push --tags, then gh release create $tag"
+            exit 1
+          fi
+          echo "Tag $tag is present — npm and GitHub are in sync."

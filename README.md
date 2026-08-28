@@ -215,8 +215,11 @@ into a "Version Packages" pull request that bumps `package.json` and rewrites
 `CHANGELOG.md`.
 
 **3. Merge that pull request.** The same workflow then runs `changeset publish`,
-which publishes to npm and pushes the git tag. A few minutes later
-`bunx @mantaray0/create-stack` resolves the new version.
+which publishes to npm, pushes the git tag and creates the GitHub release. A few
+minutes later `bunx @mantaray0/create-stack` resolves the new version. The
+workflow then verifies that the published version actually has a git tag and
+fails loudly if not — a version on npm without a tag means a publish bypassed
+Changesets (see the manual-publish note below).
 
 Useful locally:
 
@@ -248,6 +251,16 @@ npm publish --access public   # prepack rebuilds bin/create-stack.mjs
 `.changeset/config.json` (`"access": "public"`) keeps it that way. This also
 confirms the `@mantaray0` scope belongs to your account — the scope of a scoped
 package must match your npm username or an organisation you belong to.
+
+A manual `npm publish` bypasses Changesets, so it creates **no git tag and no
+GitHub release**. Close that gap immediately afterwards, otherwise npm and
+GitHub drift apart (this happened for 0.1.0):
+
+```bash
+bunx changeset tag    # tags the current version as <name>@<version>
+git push --tags
+gh release create "$(node -p 'const p=require("./package.json");`${p.name}@${p.version}`')" --generate-notes
+```
 
 **2. Register this workflow as a trusted publisher.** On npmjs.com open the
 package → *Settings* → *Trusted publisher* → GitHub Actions, and enter:
