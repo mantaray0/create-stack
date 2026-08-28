@@ -77,21 +77,15 @@ jobs:
           # publishing via OIDC when it finds none. Provenance is generated
           # automatically in that mode, so NPM_CONFIG_PROVENANCE is not needed.
 
-      # `changeset publish` runs `npm publish --json` and drops npm's stderr when
-      # it can parse the JSON, so a rejected OIDC exchange arrives as a bare
-      # ENEEDAUTH with no reason attached. npm also never validates a trusted
-      # publisher entry when it is saved — a wrong value stays invisible until a
-      # release fails. Print the claims npm actually compares against.
+      # npm never validates a trusted publisher entry when it is saved, so a
+      # wrong field stays invisible until a release fails — and it then fails as
+      # a bare ENEEDAUTH, because npm's OIDC helper swallows every reason it
+      # gives up. Replay the exchange to make the failure name its own cause.
       - name: Explain a failed publish
         if: failure() && steps.changesets.outcome == 'failure'
         run: |
-          echo "::error::Publish failed. If npm reported ENEEDAUTH, the OIDC exchange was rejected: the trusted publisher entry on npmjs.com (package -> Settings -> Trusted publisher) does not match this run."
-          echo "Organization or user: ${{ github.repository_owner }}"
-          echo "Repository:           ${{ github.event.repository.name }}"
-          echo "Workflow filename:    $(basename '${{ github.workflow_ref }}' | cut -d'@' -f1)"
-          echo "Environment:          <empty> (this job declares none)"
-          echo "npm version:          $(npm --version) (trusted publishing needs >= 11.5.1)"
-          echo "node version:         $(node --version) (needs >= 22.14.0)"
+          echo "npm $(npm --version), node $(node --version)"
+          node .github/scripts/diagnose-trusted-publishing.mjs
 
       # Guard against npm/GitHub drift: a version on npm without a matching git
       # tag means a publish bypassed `changeset publish` (the 0.1.0 incident —
