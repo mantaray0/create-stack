@@ -22,12 +22,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mantaray0/boilerplate.git"
+    "url": "git+https://github.com/mantaray0/create-stack.git"
   },
   "bugs": {
-    "url": "https://github.com/mantaray0/boilerplate/issues"
+    "url": "https://github.com/mantaray0/create-stack/issues"
   },
-  "homepage": "https://github.com/mantaray0/boilerplate#readme",
+  "homepage": "https://github.com/mantaray0/create-stack#readme",
   "bin": {
     "create-stack": "./bin/create-stack.mjs"
   },

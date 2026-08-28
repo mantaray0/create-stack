@@ -34,7 +34,7 @@ docker-compose.yml     Postgres for developing this repo (projects get the
 ### The committed bundle is load-bearing
 
 `bin/create-stack.mjs` is a **generated file that must stay committed**. It is
-what `npx github:mantaray0/boilerplate` executes, and committing it means the
+what `npx github:mantaray0/create-stack` executes, and committing it means the
 install needs no build step and no dev dependencies.
 
 **After every change under `tooling/create-stack/src/`, run `bun run build` and
