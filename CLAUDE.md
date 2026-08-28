@@ -62,6 +62,17 @@ Pushing to `main` opens a "Version Packages" pull request; merging it publishes
 to npm. See the Releasing section in `README.md` for the full flow and the
 one-time npm setup.
 
+A version on npm must always have a matching `<name>@<version>` git tag and
+GitHub release — `changeset publish` creates both, so never publish with plain
+`npm publish` (the one manual exception is the very first 0.1.0, and it must be
+followed by `bunx changeset tag && git push --tags` plus `gh release create`).
+The release workflow fails when a published version has no tag.
+
+Tag format is always `<name>@<version>` (e.g. `@mantaray0/create-stack@0.1.0`),
+never `v<version>`. This is a workspace: Changesets deliberately tags
+`<name>@<version>` here so other packages in `packages/*` can be released with
+their own tags later without colliding. Never create `vX.Y.Z` tags by hand.
+
 ### Two audiences, two guideline files
 
 - This file (and the identical `CLAUDE.md`) describes **working on the
@@ -128,7 +139,11 @@ All commits MUST follow **Conventional Commits**. Format:
 
 - Files: Components use `PascalCase.tsx`, every other module uses `kebab-case.ts`.
 - Functions/variables use `camelCase`; types/interfaces use `PascalCase`.
-- Add comments only when explicitly requested.
+- Comments explain **why**, never **what**. Leave out anything that restates
+  the code; write one where the reason is not visible from reading it — a
+  security assumption, a workaround, a constraint someone would otherwise
+  refactor away. The comments in `packages/db/src/schema.ts` and
+  `.github/workflows/release.yml` are the model.
 - Shared code lives only in `packages/`: ui (React Aria + Tailwind v4), db (Drizzle),
   auth (Better Auth), validators (Zod v4).
 - Tailwind v4 is configured CSS-first (`@theme` in `packages/ui/src/styles.css`) —
@@ -142,6 +157,8 @@ All commits MUST follow **Conventional Commits**. Format:
 - next template: data access in Server Components, mutations as Server Actions in
   `src/lib/actions/`; no separate API layer except `app/api/auth/*`.
 - New tables: extend the schema in `packages/db/src/schema.ts`, then run `bun run db:push`.
+- User-owned tables carry a `userId` foreign key, and every read, update and
+  delete in the templates filters on the session user — see `projects`.
 - Do not rename Better-Auth tables (user, session, account, verification).
 - The Postgres connection string is resolved once in
   `packages/db/src/connection.ts` and reused by the runtime client and

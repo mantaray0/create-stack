@@ -61,7 +61,10 @@ All commits MUST follow **Conventional Commits**: `type(scope): description`
 
 - Files: components use `PascalCase.tsx`, every other module uses `kebab-case.ts`.
 - Functions/variables use `camelCase`; types/interfaces use `PascalCase`.
-- Add comments only when explicitly requested.
+- Comments explain **why**, never **what**. Leave out anything that restates
+  the code; write one where the reason is not visible from reading it — a
+  security assumption, a workaround, a constraint someone would otherwise
+  refactor away. The session guards this project ships with are the model.
 - Shared code lives only in `packages/`: ui (React Aria + Tailwind v4),
   db (Drizzle), auth (Better Auth), validators (Zod v4).
 - Tailwind v4 is configured CSS-first (`@theme` in `packages/ui/src/styles.css`) —
@@ -76,6 +79,9 @@ All commits MUST follow **Conventional Commits**: `type(scope): description`
 - **next:** data access in Server Components, mutations as Server Actions in
   `src/lib/actions/`; no separate API layer except `app/api/auth/*`.
 - New tables: extend `packages/db/src/schema.ts`, then run `bun run db:push`.
+- User-owned tables carry a `userId` foreign key, and every read, update and
+  delete filters on the session user. A session proves who is calling, not
+  which rows they may touch — see `projects` for the pattern.
 - Do not rename the Better Auth tables (`user`, `session`, `account`,
   `verification`).
 - The connection string is resolved in `packages/db/src/connection.ts`:
