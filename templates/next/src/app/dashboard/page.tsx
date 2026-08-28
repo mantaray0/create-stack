@@ -1,12 +1,24 @@
 import { db, projects } from "@repo/db";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { CreateProjectForm } from "@/components/CreateProjectForm";
 import { ProjectTable } from "@/components/ProjectTable";
+import { auth } from "@/lib/auth";
 
 export const metadata = { title: "Dashboard – {{APP_TITLE}}" };
 
 export default async function DashboardPage() {
-  const allProjects = await db.query.projects.findMany({
+  // The layout redirects unauthenticated visitors, but layouts and pages render
+  // in parallel — the page cannot rely on that guard having run before its own
+  // query, and it needs the user id to scope the query anyway.
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    redirect("/login");
+  }
+
+  const ownProjects = await db.query.projects.findMany({
+    where: eq(projects.userId, session.user.id),
     orderBy: desc(projects.createdAt),
   });
 
@@ -19,7 +31,7 @@ export default async function DashboardPage() {
         </p>
       </div>
       <CreateProjectForm />
-      <ProjectTable projects={allProjects} />
+      <ProjectTable projects={ownProjects} />
     </div>
   );
 }

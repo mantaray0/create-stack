@@ -56,11 +56,18 @@ export const verification = pgTable("verification", {
 
 /**
  * Example table for prototypes — replace it with your real model.
+ *
+ * Every query filters on `userId`. A session only proves who is calling; it
+ * says nothing about which rows that caller may read or delete. Without the
+ * owner column any signed-in user can list and delete everyone else's rows.
  */
 export const projects = pgTable("projects", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
