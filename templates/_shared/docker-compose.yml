@@ -1,0 +1,24 @@
+# Every generated project gets its own container, database and volume so that
+# several prototypes can run side by side on the same machine.
+# If port 5432 is already taken, set POSTGRES_PORT in .env and adjust DATABASE_URL.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: {{APP_NAME}}-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: {{APP_NAME}}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - {{APP_NAME}}-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  {{APP_NAME}}-pgdata:

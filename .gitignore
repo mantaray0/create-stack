@@ -1,0 +1,54 @@
+# dependencies
+node_modules/
+
+# env (only commit examples, never secrets)
+.env
+.env.local
+.env.*.local
+
+# builds
+.next/
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# drizzle studio cache
+.drizzle/
+
+# editor / IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# AI assistants
+# Only personal state and generated artifacts belong here. Shared config is
+# committed on purpose — AGENTS.md, CLAUDE.md, .claude/settings.json,
+# .claude/agents/, .cursor/rules/, .github/copilot-instructions.md — because
+# that is what keeps every contributor and agent on the same rules.
+.claude/settings.local.json
+CLAUDE.local.md
+AGENTS.local.md
+.aider*
+.specstory/
+.continue/
+.codeium/
+.trae/
+
+# bun cache (bun.lock / bun.lockb are committed for reproducible installs)
+.bun/
+
+# test / coverage
+coverage/
+.nyc_output/
+
+# misc
+.DS_Store
+Thumbs.db
+*.log
+.turbo/
+.vercel/
+.cache/
+tmp/
+temp/

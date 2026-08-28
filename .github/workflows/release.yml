@@ -1,0 +1,57 @@
+name: Release
+
+# Changesets drives releases: pushing to main opens or updates a
+# "Version Packages" pull request that collects the pending changesets.
+# Merging that pull request publishes to npm, which is what makes
+# `bunx @mantaray0/create-stack` resolve the new version.
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Changesets compares against the base branch, so it needs history.
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+
+      - run: bun install --frozen-lockfile
+
+      - name: Verify before releasing
+        run: |
+          bun run lint
+          bun run typecheck
+          bun run smoke
+
+      - uses: changesets/action@v1
+        with:
+          version: bun run changeset:version
+          publish: bun run changeset:publish
+          commit: "chore(release): version packages"
+          title: "chore(release): version packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # npm reads this as --provenance, which changeset publish does not
+          # expose as a flag. Requires the id-token permission above.
+          NPM_CONFIG_PROVENANCE: "true"

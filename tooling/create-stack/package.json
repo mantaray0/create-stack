@@ -1,0 +1,14 @@
+{
+  "name": "@repo/create-stack",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Source of the create-stack scaffolder. Bundled into ../../bin/create-stack.mjs.",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: oklch(0.985 0.002 247.84);
+  --fg: oklch(0.21 0.01 264.67);
+  --card: oklch(1 0 0);
+  --muted: oklch(0.955 0.004 247.84);
+  --muted-fg: oklch(0.51 0.012 264.67);
+  --border: oklch(0.9 0.006 264.53);
+  --input: oklch(0.87 0.008 264.53);
+  --primary: oklch(0.51 0.21 276.97);
+  --primary-fg: oklch(0.985 0 0);
+  --ring: oklch(0.51 0.21 276.97);
+  --danger: oklch(0.58 0.21 27.03);
+  --success: oklch(0.63 0.17 159.62);
+}
+
+.dark {
+  --bg: oklch(0.155 0.006 264.67);
+  --fg: oklch(0.93 0.004 247.84);
+  --card: oklch(0.19 0.007 264.67);
+  --muted: oklch(0.235 0.008 264.67);
+  --muted-fg: oklch(0.66 0.01 247.84);
+  --border: oklch(0.285 0.009 264.67);
+  --input: oklch(0.31 0.01 264.67);
+  --primary: oklch(0.63 0.18 276.97);
+  --primary-fg: oklch(0.985 0 0);
+  --ring: oklch(0.63 0.18 276.97);
+  --danger: oklch(0.66 0.19 27.03);
+  --success: oklch(0.7 0.15 159.62);
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-fg);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-fg);
+  --color-ring: var(--ring);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
