@@ -1,4 +1,5 @@
 name: Release
+run-name: "Release · ${{ github.event.head_commit.message }}"
 
 # Changesets drives releases: pushing to main opens or updates a
 # "Version Packages" pull request that collects the pending changesets.
