@@ -228,21 +228,16 @@ bun run changeset:version    # preview the bump and changelog (do not commit bli
 
 #### One-time npm setup
 
-Publishing needs three things in place:
+Releases authenticate with **npm trusted publishing** (OIDC). No token is stored
+in this repository. npm is retiring 2FA-bypassing access tokens — they lose
+account management rights in August 2026 and direct publish rights around
+January 2027 — so a token-based release would stop working.
 
-1. **An npm account that owns the `@mantaray0` scope.** The scope of a scoped
-   package must match your npm username or an organisation you belong to. Sign
-   in at [npmjs.com](https://www.npmjs.com/); the scope exists implicitly once
-   the username does.
-2. **A repository secret `NPM_TOKEN`.** Create a *Granular Access* token on npm
-   with read+write for `@mantaray0/*`, then add it under
-   *Settings → Secrets and variables → Actions → New repository secret*.
-   Classic *Automation* tokens work too and skip 2FA prompts in CI.
-3. **Nothing else** — the workflow already grants `id-token: write` and sets
-   `NPM_CONFIG_PROVENANCE`, so releases are published with build provenance.
+Because a trusted publisher is configured *on the package*, the package has to
+exist first. That makes the very first release a manual one:
 
-The very first release can also be done by hand, which is the quickest way to
-confirm the scope and token work:
+**1. Publish 0.1.0 by hand**, from a machine where you can answer the 2FA
+prompt:
 
 ```bash
 npm login
@@ -250,12 +245,29 @@ npm publish --access public   # prepack rebuilds bin/create-stack.mjs
 ```
 
 `--access public` is required once for a scoped package; afterwards
-`.changeset/config.json` (`"access": "public"`) keeps it that way.
+`.changeset/config.json` (`"access": "public"`) keeps it that way. This also
+confirms the `@mantaray0` scope belongs to your account — the scope of a scoped
+package must match your npm username or an organisation you belong to.
 
-> Prefer no long-lived token? npm's *Trusted Publishing* can authorise this
-> repository's workflow via OIDC instead. Configure it on the package page, then
-> drop `NODE_AUTH_TOKEN` from `release.yml`. It needs npm >= 11.5.1 on the
-> runner, so pin `node-version` accordingly.
+**2. Register this workflow as a trusted publisher.** On npmjs.com open the
+package → *Settings* → *Trusted publisher* → GitHub Actions, and enter:
+
+| Field | Value |
+|---|---|
+| Organization or user | `mantaray0` |
+| Repository | `boilerplate` |
+| Workflow filename | `release.yml` — the file name only, not a path |
+| Environment | leave empty |
+
+**3. That is it.** Every later release runs unattended. Provenance is generated
+automatically in this mode, so no `--provenance` flag and no
+`NPM_CONFIG_PROVENANCE` are needed. If an `NPM_TOKEN` secret still exists in the
+repository, delete it — `changesets/action` prefers a token when it finds one
+and would fall back to the path that is being retired.
+
+Requirements the workflow already satisfies: `id-token: write`, a cloud-hosted
+runner, Node >= 22.14.0 and npm >= 11.5.1. Renaming `release.yml` breaks
+publishing until the trusted publisher entry is updated to match.
 
 ---
 

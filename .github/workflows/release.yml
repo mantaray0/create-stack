@@ -4,6 +4,15 @@ name: Release
 # "Version Packages" pull request that collects the pending changesets.
 # Merging that pull request publishes to npm, which is what makes
 # `bunx @mantaray0/create-stack` resolve the new version.
+#
+# Authentication is npm trusted publishing (OIDC) — no token is stored here.
+# npm is deprecating 2FA-bypassing access tokens: they lose account management
+# rights in August 2026 and direct publish rights around January 2027, so a
+# token-based release would stop working. Trusted publishing keeps working
+# even with "require two-factor authentication and disallow tokens" enabled.
+#
+# This requires a one-time setup on npmjs.com — see "Releasing" in README.md.
+# The workflow file name registered there must stay "release.yml".
 on:
   push:
     branches: [main]
@@ -15,6 +24,7 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  # Mints the OIDC token npm verifies. Trusted publishing fails without it.
   id-token: write
 
 jobs:
@@ -32,8 +42,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
+          # Trusted publishing needs Node >= 22.14.0.
           node-version: "24"
           registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs npm >= 11.5.1. Upgrading explicitly keeps the
+      # release independent of whichever npm the Node image happens to bundle.
+      - name: Use an npm that supports trusted publishing
+        run: npm install -g npm@latest
 
       - run: bun install --frozen-lockfile
 
@@ -51,7 +67,6 @@ jobs:
           title: "chore(release): version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # npm reads this as --provenance, which changeset publish does not
-          # expose as a flag. Requires the id-token permission above.
-          NPM_CONFIG_PROVENANCE: "true"
+          # No NPM_TOKEN on purpose: changesets/action falls back to trusted
+          # publishing via OIDC when it finds none. Provenance is generated
+          # automatically in that mode, so NPM_CONFIG_PROVENANCE is not needed.
