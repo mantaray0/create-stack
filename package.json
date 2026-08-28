@@ -1,6 +1,6 @@
 {
   "name": "@mantaray0/create-stack",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Standalone scaffolder for prototype monorepos — Vite+Hono or Next.js, with shared UI, DB, auth and validation packages.",
   "license": "MIT",
   "author": "mantaray0",
