@@ -1,9 +1,10 @@
 name: CI
 
 # Both workflows fire on the same push to main, so without a run name the
-# Actions list shows two rows with an identical title. The prefix says which
-# one is which before the commit subject.
-run-name: "CI · ${{ github.event_name == 'pull_request' && format('PR #{0} — {1}', github.event.number, github.event.pull_request.title) || github.event.head_commit.message }}"
+# Actions list shows two rows with an identical title. Push runs cannot name
+# their commit: expressions have no split, and head_commit.message drags the
+# whole multi-line body into the title, so they carry the run number instead.
+run-name: "CI · ${{ github.event_name == 'pull_request' && format('PR #{0} — {1}', github.event.number, github.event.pull_request.title) || format('{0} #{1}', github.ref_name, github.run_number) }}"
 
 on:
   push:
