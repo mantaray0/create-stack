@@ -65,18 +65,23 @@ jobs:
           bun run typecheck
           bun run smoke
 
-      - uses: changesets/action@v1
+      # v2 is the line that speaks Changesets v3: v1 detected published packages
+      # by grepping the CLI's stdout for "New tag:", which v3 no longer prints,
+      # so it silently concluded nothing shipped and skipped both the git tag
+      # and the GitHub release — while npm had the package. v2 reads the
+      # CHANGESETS_OUTPUT file the CLI writes instead. Inputs are kebab-case
+      # here, and `github-token` defaults to the job's own token.
+      #
+      # No NPM_TOKEN on purpose: with none present the action authenticates the
+      # publish through OIDC. Provenance is generated automatically in that
+      # mode, so NPM_CONFIG_PROVENANCE is not needed.
+      - uses: changesets/action@v2
         id: changesets
         with:
-          version: bun run changeset:version
-          publish: bun run changeset:publish
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # No NPM_TOKEN on purpose: changesets/action falls back to trusted
-          # publishing via OIDC when it finds none. Provenance is generated
-          # automatically in that mode, so NPM_CONFIG_PROVENANCE is not needed.
+          version-script: bun run changeset:version
+          publish-script: bun run changeset:publish
+          commit-message: "chore(release): version packages"
+          pr-title: "chore(release): version packages"
 
       # npm never validates a trusted publisher entry when it is saved, so a
       # wrong field stays invisible until a release fails — and it then fails as
@@ -89,13 +94,15 @@ jobs:
           node .github/scripts/diagnose-trusted-publishing.mjs
 
       # Guard against npm/GitHub drift: a version on npm without a matching git
-      # tag means a publish bypassed `changeset publish` (the 0.1.0 incident —
-      # manual `npm publish` shipped without tag or GitHub release). Fail loudly
-      # instead of letting the gap go unnoticed. Only meaningful after an actual
-      # publish — on the pushes that merely open the version pull request,
-      # package.json still holds the previously released version.
+      # tag means the publish bypassed `changeset publish` (0.1.0, shipped by
+      # hand) or the action failed to tag it (0.2.1, under the v1 action).
+      #
+      # Deliberately unconditional. Gating this on the action's own `published`
+      # output hid the 0.2.1 drift: the action wrongly reported that nothing was
+      # published, which skipped the very check meant to catch that. On the
+      # pushes that only open the version pull request, package.json still holds
+      # the previous release, which has a tag — so the check simply passes.
       - name: Verify the published version has a git tag
-        if: steps.changesets.outputs.published == 'true'
         run: |
           tag="$(node -p 'const p=require("./package.json");`${p.name}@${p.version}`')"
           git fetch --tags origin
