@@ -1,13 +1,15 @@
-export const templates = ["vite-hono", "next"] as const;
+export const templates = ["vite-hono", "next", "next-hono"] as const;
 
 export type Template = (typeof templates)[number];
 
-export const defaultTemplate: Template = "vite-hono";
+export const defaultTemplate: Template = "next-hono";
 
 /** Human readable one-liners used in the interactive template picker. */
 export const templateDescriptions: Record<Template, string> = {
   "vite-hono": "Vite SPA + Hono API (Bun), end-to-end typed via Hono RPC",
   next: "Next.js 16 App Router with Server Components and Server Actions",
+  "next-hono":
+    "Next.js 16 with a Hono API mounted in a route handler, RPC-typed for outside clients",
 };
 
 /** Shared packages copied into every generated project. */

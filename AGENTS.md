@@ -21,8 +21,9 @@ standalone prototype monorepo anywhere on disk (or on any machine, via
 ```
 bin/create-stack.mjs   Committed Node bundle — the published entry point
 tooling/create-stack/    TypeScript source of the CLI (bundled into bin/)
-templates/vite-hono/   App template 1 — becomes the generated project root
-templates/next/        App template 2 — becomes the generated project root
+templates/vite-hono/   App template — Vite SPA + standalone Hono API (Bun)
+templates/next/        App template — Next.js, Server Components + Server Actions
+templates/next-hono/   App template (default) — Next.js + Hono API in a route handler
 templates/_shared/     Files every generated project gets (placeholders, dotfiles)
 packages/              Shared packages copied into every generated project
 biome.json             Shared Biome config — used here AND copied to projects
@@ -156,6 +157,11 @@ All commits MUST follow **Conventional Commits**. Format:
   (important for RPC types), validation via `zValidator` + schemas from `@repo/validators`.
 - next template: data access in Server Components, mutations as Server Actions in
   `src/lib/actions/`; no separate API layer except `app/api/auth/*`.
+- next-hono template: like `next` for pages and mutations, plus a read-only Hono
+  API in `src/server/` mounted at `src/app/api/[[...route]]/route.ts`. Route
+  handlers hold no logic — they resolve the caller and call the same
+  `src/lib/queries/*` functions the Server Components use. `ApiRoutes` is
+  re-exported there for outside clients.
 - New tables: extend the schema in `packages/db/src/schema.ts`, then run `bun run db:push`.
 - User-owned tables carry a `userId` foreign key, and every read, update and
   delete in the templates filters on the session user — see `projects`.

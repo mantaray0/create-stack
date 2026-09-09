@@ -70,6 +70,10 @@ All commits MUST follow **Conventional Commits**: `type(scope): description`
 - Tailwind v4 is configured CSS-first (`@theme` in `packages/ui/src/styles.css`) —
   do not create a `tailwind.config.js`.
 - Use the Zod v4 API (e.g. `z.uuid()` instead of `z.string().uuid()`).
+- Client state is only what never comes from the server (theme, open dialogs):
+  `zustand` in a store under `src/store/` (see vite-hono's `use-ui-store.ts`).
+  Server data is TanStack Query (vite-hono) or Server Components (next /
+  next-hono) — not a store, not Redux, not Context as a state manager.
 
 ## Architecture Rules
 
@@ -78,6 +82,13 @@ All commits MUST follow **Conventional Commits**: `type(scope): description`
   `@repo/validators`.
 - **next:** data access in Server Components, mutations as Server Actions in
   `src/lib/actions/`; no separate API layer except `app/api/auth/*`.
+- **next-hono:** pages and mutations like **next** (Server Components + Server
+  Actions), plus a read-only Hono API in `src/server/` mounted at
+  `src/app/api/[[...route]]/route.ts`. Handlers hold no logic — they resolve
+  the caller and call the same `src/lib/queries/*` functions the Server
+  Components use, so the API and the pages cannot drift. Chain the route
+  instances (breaking the chain loses the RPC type `ApiRoutes` re-exports for
+  outside clients). Better Auth keeps its own handler at `app/api/auth/*`.
 - New tables: extend `packages/db/src/schema.ts`, then run `bun run db:push`.
 - User-owned tables carry a `userId` foreign key, and every read, update and
   delete filters on the session user. A session proves who is calling, not

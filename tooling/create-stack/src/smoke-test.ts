@@ -40,6 +40,12 @@ const requiredFiles = [
 const templateEntryPoints: Record<Template, string[]> = {
   "vite-hono": ["vite.config.ts", "server/index.ts", "src/App.tsx"],
   next: ["next.config.ts", "src/app/page.tsx"],
+  "next-hono": [
+    "next.config.ts",
+    "src/app/page.tsx",
+    "src/app/api/[[...route]]/route.ts",
+    "src/server/api.ts",
+  ],
 };
 
 function checkTemplate(boilerplateRoot: string, template: Template, appName: string): void {

@@ -7,9 +7,9 @@ no need to clone this repository.
 bunx @mantaray0/create-stack ~/projects/my-idea
 ```
 
-You get a standalone project with a Vite+Hono or Next.js app at the root, a
-shared UI/DB/auth/validation layer in `packages/`, Postgres via Docker Compose,
-and Biome + TypeScript already wired up.
+You get a standalone project — a Vite+Hono, Next.js, or Next.js + Hono API app
+at the root — with a shared UI/DB/auth/validation layer in `packages/`, Postgres
+via Docker Compose, and Biome + TypeScript already wired up.
 
 ---
 
@@ -40,7 +40,8 @@ Where should the project be created? (./my-prototype) ~/projects/acme
 Which template do you want to use?
   1) vite-hono — Vite SPA + Hono API (Bun), end-to-end typed via Hono RPC
   2) next      — Next.js 16 App Router with Server Components and Server Actions
-Select (1-2) [1] 1
+  3) next-hono — Next.js 16 with a Hono API mounted in a route handler, RPC-typed for outside clients
+Select (1-3) [3] 3
 Run 'bun install' now? (Y/n) y
 Initialise a git repository? (Y/n) y
 ```
@@ -51,7 +52,7 @@ Initialise a git repository? (Y/n) y
 # Next.js, install dependencies and create the first commit, no questions asked
 bunx @mantaray0/create-stack ~/projects/acme -t next --install --git -y
 
-# Vite + Hono into a relative path
+# Next.js + Hono API (the default template) into a relative path
 bunx @mantaray0/create-stack ./my-idea
 
 # Overwrite an existing, non-empty folder
@@ -63,7 +64,7 @@ bunx @mantaray0/create-stack ./my-idea --force
 | Option | Description |
 |---|---|
 | `target-dir` | Destination folder. Must be empty unless `--force` is passed. |
-| `-t, --template` | `vite-hono` (default) or `next` |
+| `-t, --template` | `vite-hono`, `next`, or `next-hono` (default) |
 | `-f, --force` | Overwrite the target directory if it is not empty |
 | `--install` / `--no-install` | Run `bun install` in the new project |
 | `--git` / `--no-git` | `git init` plus the first commit |
@@ -118,7 +119,7 @@ my-idea/
     auth/         Better Auth — server + client entry points
     validators/   Shared Zod v4 schemas
   src/            Your app (Next.js src/ or Vite src/)
-  server/         (vite-hono only) Hono API with RPC-typed routes
+  server/         Hono API with RPC-typed routes (vite-hono; next-hono keeps it under src/server/)
   package.json    Workspace root — every script runs from here
   biome.json  tsconfig.base.json  docker-compose.yml
   .env.example  .gitignore  LICENSE  README.md
@@ -131,6 +132,7 @@ my-idea/
 |---|---|---|
 | `vite-hono` | Fast SaaS-style prototype. Vite SPA + separate Hono Bun API, fully RPC-typed client. | `bun run dev` — web `:5173`, api `:3001` |
 | `next` | SEO-heavy marketing site + app. Next.js 16 App Router, Server Components + Actions. | `bun run dev` — `:3000` |
+| `next-hono` | **Default.** A Next.js app that also needs an API other clients call. Server Components + Actions for the app, plus a read-only Hono API mounted in a route handler (one process, `:3000`). | `bun run dev` — `:3000` |
 
 ### Scripts in a generated project
 
@@ -165,8 +167,9 @@ bun run build                              # rebuild bin/create-stack.mjs
 ```
 bin/create-stack.mjs   Committed Node bundle — the published entry point
 tooling/create-stack/    TypeScript source of the CLI (bundled into bin/)
-templates/vite-hono/   App template 1 — becomes the generated project root
-templates/next/        App template 2 — becomes the generated project root
+templates/vite-hono/   App template — Vite SPA + standalone Hono API (Bun)
+templates/next/        App template — Next.js, Server Components + Server Actions
+templates/next-hono/   App template (default) — Next.js + Hono API in a route handler
 templates/_shared/     Files every generated project gets (placeholders, dotfiles)
 packages/              Shared packages copied into every generated project
 biome.json             Shared Biome config — used here AND copied to projects
