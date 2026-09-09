@@ -114,6 +114,8 @@ Concrete rules enforced (see `biome.json` for details):
 - Global `const`: `camelCase`, `CONSTANT_CASE`, or `PascalCase`
 - Framework route files (Next.js `app/`, Hono `server/routes/`) are exempt
   from the filename check
+- Files over 500 lines **warn** (`bun run lint` still exits 0) — it is a
+  prompt to split the module into smaller pieces, not a gate to work around
 
 Run `bun run typecheck` before any larger commit as well.
 

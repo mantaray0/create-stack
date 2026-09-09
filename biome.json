@@ -29,6 +29,10 @@
       "preset": "recommended",
       "style": {
         "noNonNullAssertion": "off",
+        "noExcessiveLinesPerFile": {
+          "level": "warn",
+          "options": { "maxLines": 500 }
+        },
         "useNamingConvention": {
           "level": "error",
           "options": {
