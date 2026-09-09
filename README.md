@@ -9,7 +9,7 @@ bunx @mantaray0/create-stack ~/projects/my-idea
 
 You get a standalone project — a Vite+Hono, Next.js, or Next.js + Hono API app
 at the root — with a shared UI/DB/auth/validation layer in `packages/`, Postgres
-via Docker Compose, and Biome + TypeScript already wired up.
+via Docker Compose, and Biome + TypeScript + Vitest already wired up.
 
 ---
 
@@ -140,6 +140,7 @@ my-idea/
 |---|---|
 | `bun run dev` | Template-specific dev server |
 | `bun run build` | Production build |
+| `bun run test` | Vitest (`bun run test:watch` to watch) |
 | `bun run lint` / `format` | Biome check / auto-fix |
 | `bun run typecheck` | `tsc` for the app **and** every shared package |
 | `bun run db:up` / `db:down` | Start / stop Postgres |
@@ -301,6 +302,7 @@ failure and prints the registry's actual objection.
 - Tailwind v4 is CSS-first: edit `@theme` in `packages/ui/src/styles.css`, never
   create a `tailwind.config.js`.
 - Zod v4 API (`z.uuid()`, not `z.string().uuid()`).
+- Tests run on Vitest (`bun run test`); each template carries its own config.
 - New tables: extend `packages/db/src/schema.ts`, then `bun run db:push`. Never
   rename the Better Auth tables (`user`, `session`, `account`, `verification`).
 - Commits follow **Conventional Commits**.

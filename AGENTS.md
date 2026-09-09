@@ -89,7 +89,7 @@ their own tags later without colliding. Never create `vX.Y.Z` tags by hand.
   CLI itself still runs on Node >= 18, which is what `engines` declares.
 - Build the CLI bundle: `bun run build`
 - Smoke-test the scaffolder: `bun run smoke`
-- Deep-verify the templates: `bun run verify`
+- Deep-verify the templates: `bun run verify` (install, typecheck, lint, test)
 - Add release notes: `bun run changeset`
 - Scaffold from source (dev loop): `bun run create /tmp/test-idea --template next -y`
 - DB (for developing `packages/db`): `bun run db:up`, `bun run db:push`, `bun run db:generate`
@@ -162,6 +162,9 @@ All commits MUST follow **Conventional Commits**. Format:
   handlers hold no logic — they resolve the caller and call the same
   `src/lib/queries/*` functions the Server Components use. `ApiRoutes` is
   re-exported there for outside clients.
+- Tests: Vitest in every template. API route tests drive the Hono instance with
+  `route.request(...)` (no server, no DB); component tests use
+  `@testing-library/react`.
 - New tables: extend the schema in `packages/db/src/schema.ts`, then run `bun run db:push`.
 - User-owned tables carry a `userId` foreign key, and every read, update and
   delete in the templates filters on the session user — see `projects`.

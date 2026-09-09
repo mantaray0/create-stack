@@ -166,6 +166,7 @@ tsconfig.base.json  Shared TypeScript base
 |---|---|
 | \`bun run dev\` | Start the dev server |
 | \`bun run build\` | Production build |
+| \`bun run test\` | Run the test suite (Vitest) |
 | \`bun run lint\` / \`format\` | Biome check / auto-fix |
 | \`bun run typecheck\` | TypeScript check across all workspaces |
 | \`bun run db:up\` / \`db:down\` | Start / stop Postgres |

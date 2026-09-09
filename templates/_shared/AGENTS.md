@@ -22,6 +22,7 @@ in `packages/*`.
 - Install: `bun install` (Bun only, no npm/pnpm/yarn)
 - Dev: `bun run dev`
 - Build: `bun run build`
+- Test: `bun run test` (Vitest), `bun run test:watch`
 - DB: `bun run db:up`, `bun run db:push`, `bun run db:generate`, `bun run db:studio`
 - Lint/Format: `bun run lint`, `bun run format` (Biome, no ESLint/Prettier)
 - Types: `bun run typecheck`
@@ -89,6 +90,9 @@ All commits MUST follow **Conventional Commits**: `type(scope): description`
   Components use, so the API and the pages cannot drift. Chain the route
   instances (breaking the chain loses the RPC type `ApiRoutes` re-exports for
   outside clients). Better Auth keeps its own handler at `app/api/auth/*`.
+- **Tests (Vitest):** API route tests import the chained instance and call
+  `route.request(...)` — no server, no port, no database; keep them to input
+  and auth boundaries. Component tests render with `@testing-library/react`.
 - New tables: extend `packages/db/src/schema.ts`, then run `bun run db:push`.
 - User-owned tables carry a `userId` foreign key, and every read, update and
   delete filters on the session user. A session proves who is calling, not

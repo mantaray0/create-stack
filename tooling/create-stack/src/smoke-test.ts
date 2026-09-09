@@ -76,6 +76,7 @@ function checkTemplate(boilerplateRoot: string, template: Template, appName: str
     };
     expect(template, packageJson.name === appName, `package.json name is ${packageJson.name}`);
     expect(template, Boolean(packageJson.scripts?.dev), "package.json has no dev script");
+    expect(template, Boolean(packageJson.scripts?.test), "package.json has no test script");
     expect(
       template,
       Boolean(packageJson.scripts?.["db:push"]),

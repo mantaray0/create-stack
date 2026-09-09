@@ -17,7 +17,7 @@ import { type Template, templates } from "./constants.js";
 import { findBoilerplateRoot, readToolingVersions } from "./paths.js";
 import { scaffold } from "./scaffold.js";
 
-const gates = ["install", "typecheck", "lint"] as const;
+const gates = ["install", "typecheck", "lint", "test"] as const;
 
 type Gate = (typeof gates)[number];
 
@@ -25,6 +25,7 @@ const gateCommands: Record<Gate, string[]> = {
   install: ["install"],
   typecheck: ["run", "typecheck"],
   lint: ["run", "lint"],
+  test: ["run", "test"],
 };
 
 function runGate(gate: Gate, cwd: string): boolean {
