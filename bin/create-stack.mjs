@@ -4,11 +4,12 @@
 import { basename, isAbsolute, relative, resolve as resolve2 } from "node:path";
 
 // tooling/create-stack/src/constants.ts
-var templates = ["vite-hono", "next"];
-var defaultTemplate = "vite-hono";
+var templates = ["vite-hono", "next", "next-hono"];
+var defaultTemplate = "next-hono";
 var templateDescriptions = {
   "vite-hono": "Vite SPA + Hono API (Bun), end-to-end typed via Hono RPC",
-  next: "Next.js 16 App Router with Server Components and Server Actions"
+  next: "Next.js 16 App Router with Server Components and Server Actions",
+  "next-hono": "Next.js 16 with a Hono API mounted in a route handler, RPC-typed for outside clients"
 };
 var sharedPackages = ["ui", "db", "auth", "validators"];
 var droppedDirectories = new Set(["node_modules", "drizzle"]);
@@ -348,13 +349,23 @@ function devCommandHint(template) {
   return template === "vite-hono" ? "bun run dev          # web: http://localhost:5173, api: http://localhost:3001" : "bun run dev          # http://localhost:3000";
 }
 function writeReadme(targetDir, template, placeholders) {
-  const templateBlurb = template === "vite-hono" ? "Vite SPA + Hono API (Bun), fully end-to-end typed via Hono RPC." : "Next.js 16 (App Router, Server Components, Server Actions).";
-  const appLayout = template === "vite-hono" ? `src/             Vite SPA
-server/          Hono API server (RPC typed routes)` : `src/app/         Next.js App Router
-src/lib/actions/ Server Actions`;
+  const templateBlurb = {
+    "vite-hono": "Vite SPA + Hono API (Bun), fully end-to-end typed via Hono RPC.",
+    next: "Next.js 16 (App Router, Server Components, Server Actions).",
+    "next-hono": "Next.js 16 (App Router, Server Components, Server Actions) with a Hono API mounted in a route handler."
+  };
+  const appLayout = {
+    "vite-hono": `src/             Vite SPA
+server/          Hono API server (RPC typed routes)`,
+    next: `src/app/         Next.js App Router
+src/lib/actions/ Server Actions`,
+    "next-hono": `src/app/         Next.js App Router
+src/lib/actions/ Server Actions (mutations)
+src/server/      Hono API — routes/, mounted at src/app/api/[[...route]]/`
+  };
   const content = `# ${placeholders.appTitle}
 
-Generated with create-stack — ${templateBlurb}
+Generated with create-stack — ${templateBlurb[template]}
 
 ## Stack
 
@@ -387,7 +398,7 @@ packages/
   db/            Drizzle schema, client, migrations
   auth/          Better Auth config (server + client)
   validators/    Shared Zod schemas
-${appLayout}
+${appLayout[template]}
 docker-compose.yml  Local Postgres
 biome.json          Lint + format rules
 tsconfig.base.json  Shared TypeScript base
@@ -399,6 +410,7 @@ tsconfig.base.json  Shared TypeScript base
 |---|---|
 | \`bun run dev\` | Start the dev server |
 | \`bun run build\` | Production build |
+| \`bun run test\` | Run the test suite (Vitest) |
 | \`bun run lint\` / \`format\` | Biome check / auto-fix |
 | \`bun run typecheck\` | TypeScript check across all workspaces |
 | \`bun run db:up\` / \`db:down\` | Start / stop Postgres |

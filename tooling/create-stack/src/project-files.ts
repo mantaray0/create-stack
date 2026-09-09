@@ -105,19 +105,23 @@ export function writeReadme(
   template: Template,
   placeholders: Placeholders,
 ): void {
-  const templateBlurb =
-    template === "vite-hono"
-      ? "Vite SPA + Hono API (Bun), fully end-to-end typed via Hono RPC."
-      : "Next.js 16 (App Router, Server Components, Server Actions).";
+  const templateBlurb: Record<Template, string> = {
+    "vite-hono": "Vite SPA + Hono API (Bun), fully end-to-end typed via Hono RPC.",
+    next: "Next.js 16 (App Router, Server Components, Server Actions).",
+    "next-hono":
+      "Next.js 16 (App Router, Server Components, Server Actions) with a Hono API mounted in a route handler.",
+  };
 
-  const appLayout =
-    template === "vite-hono"
-      ? "src/             Vite SPA\nserver/          Hono API server (RPC typed routes)"
-      : "src/app/         Next.js App Router\nsrc/lib/actions/ Server Actions";
+  const appLayout: Record<Template, string> = {
+    "vite-hono": "src/             Vite SPA\nserver/          Hono API server (RPC typed routes)",
+    next: "src/app/         Next.js App Router\nsrc/lib/actions/ Server Actions",
+    "next-hono":
+      "src/app/         Next.js App Router\nsrc/lib/actions/ Server Actions (mutations)\nsrc/server/      Hono API — routes/, mounted at src/app/api/[[...route]]/",
+  };
 
   const content = `# ${placeholders.appTitle}
 
-Generated with create-stack — ${templateBlurb}
+Generated with create-stack — ${templateBlurb[template]}
 
 ## Stack
 
@@ -150,7 +154,7 @@ packages/
   db/            Drizzle schema, client, migrations
   auth/          Better Auth config (server + client)
   validators/    Shared Zod schemas
-${appLayout}
+${appLayout[template]}
 docker-compose.yml  Local Postgres
 biome.json          Lint + format rules
 tsconfig.base.json  Shared TypeScript base
@@ -162,6 +166,7 @@ tsconfig.base.json  Shared TypeScript base
 |---|---|
 | \`bun run dev\` | Start the dev server |
 | \`bun run build\` | Production build |
+| \`bun run test\` | Run the test suite (Vitest) |
 | \`bun run lint\` / \`format\` | Biome check / auto-fix |
 | \`bun run typecheck\` | TypeScript check across all workspaces |
 | \`bun run db:up\` / \`db:down\` | Start / stop Postgres |

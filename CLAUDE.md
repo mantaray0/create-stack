@@ -21,8 +21,9 @@ standalone prototype monorepo anywhere on disk (or on any machine, via
 ```
 bin/create-stack.mjs   Committed Node bundle — the published entry point
 tooling/create-stack/    TypeScript source of the CLI (bundled into bin/)
-templates/vite-hono/   App template 1 — becomes the generated project root
-templates/next/        App template 2 — becomes the generated project root
+templates/vite-hono/   App template — Vite SPA + standalone Hono API (Bun)
+templates/next/        App template — Next.js, Server Components + Server Actions
+templates/next-hono/   App template (default) — Next.js + Hono API in a route handler
 templates/_shared/     Files every generated project gets (placeholders, dotfiles)
 packages/              Shared packages copied into every generated project
 biome.json             Shared Biome config — used here AND copied to projects
@@ -88,7 +89,7 @@ their own tags later without colliding. Never create `vX.Y.Z` tags by hand.
   CLI itself still runs on Node >= 18, which is what `engines` declares.
 - Build the CLI bundle: `bun run build`
 - Smoke-test the scaffolder: `bun run smoke`
-- Deep-verify the templates: `bun run verify`
+- Deep-verify the templates: `bun run verify` (install, typecheck, lint, test)
 - Add release notes: `bun run changeset`
 - Scaffold from source (dev loop): `bun run create /tmp/test-idea --template next -y`
 - DB (for developing `packages/db`): `bun run db:up`, `bun run db:push`, `bun run db:generate`
@@ -113,6 +114,8 @@ Concrete rules enforced (see `biome.json` for details):
 - Global `const`: `camelCase`, `CONSTANT_CASE`, or `PascalCase`
 - Framework route files (Next.js `app/`, Hono `server/routes/`) are exempt
   from the filename check
+- Files over 500 lines **warn** (`bun run lint` still exits 0) — it is a
+  prompt to split the module into smaller pieces, not a gate to work around
 
 Run `bun run typecheck` before any larger commit as well.
 
@@ -156,6 +159,14 @@ All commits MUST follow **Conventional Commits**. Format:
   (important for RPC types), validation via `zValidator` + schemas from `@repo/validators`.
 - next template: data access in Server Components, mutations as Server Actions in
   `src/lib/actions/`; no separate API layer except `app/api/auth/*`.
+- next-hono template: like `next` for pages and mutations, plus a read-only Hono
+  API in `src/server/` mounted at `src/app/api/[[...route]]/route.ts`. Route
+  handlers hold no logic — they resolve the caller and call the same
+  `src/lib/queries/*` functions the Server Components use. `ApiRoutes` is
+  re-exported there for outside clients.
+- Tests: Vitest in every template. API route tests drive the Hono instance with
+  `route.request(...)` (no server, no DB); component tests use
+  `@testing-library/react`.
 - New tables: extend the schema in `packages/db/src/schema.ts`, then run `bun run db:push`.
 - User-owned tables carry a `userId` foreign key, and every read, update and
   delete in the templates filters on the session user — see `projects`.

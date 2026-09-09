@@ -22,6 +22,7 @@ in `packages/*`.
 - Install: `bun install` (Bun only, no npm/pnpm/yarn)
 - Dev: `bun run dev`
 - Build: `bun run build`
+- Test: `bun run test` (Vitest), `bun run test:watch`
 - DB: `bun run db:up`, `bun run db:push`, `bun run db:generate`, `bun run db:studio`
 - Lint/Format: `bun run lint`, `bun run format` (Biome, no ESLint/Prettier)
 - Types: `bun run typecheck`
@@ -44,6 +45,8 @@ Concrete rules enforced (see `biome.json`):
 - Global `const`: `camelCase`, `CONSTANT_CASE` or `PascalCase`
 - Framework route files (Next.js `app/`, Hono `server/routes/`) are exempt from
   the filename check
+- Files over 500 lines **warn** (`lint` still passes) — treat it as a prompt to
+  split the module, not a gate to silence
 
 Run `bun run typecheck` before any larger commit as well.
 
@@ -70,6 +73,10 @@ All commits MUST follow **Conventional Commits**: `type(scope): description`
 - Tailwind v4 is configured CSS-first (`@theme` in `packages/ui/src/styles.css`) —
   do not create a `tailwind.config.js`.
 - Use the Zod v4 API (e.g. `z.uuid()` instead of `z.string().uuid()`).
+- Client state is only what never comes from the server (theme, open dialogs):
+  `zustand` in a store under `src/store/` (see vite-hono's `use-ui-store.ts`).
+  Server data is TanStack Query (vite-hono) or Server Components (next /
+  next-hono) — not a store, not Redux, not Context as a state manager.
 
 ## Architecture Rules
 
@@ -78,6 +85,16 @@ All commits MUST follow **Conventional Commits**: `type(scope): description`
   `@repo/validators`.
 - **next:** data access in Server Components, mutations as Server Actions in
   `src/lib/actions/`; no separate API layer except `app/api/auth/*`.
+- **next-hono:** pages and mutations like **next** (Server Components + Server
+  Actions), plus a read-only Hono API in `src/server/` mounted at
+  `src/app/api/[[...route]]/route.ts`. Handlers hold no logic — they resolve
+  the caller and call the same `src/lib/queries/*` functions the Server
+  Components use, so the API and the pages cannot drift. Chain the route
+  instances (breaking the chain loses the RPC type `ApiRoutes` re-exports for
+  outside clients). Better Auth keeps its own handler at `app/api/auth/*`.
+- **Tests (Vitest):** API route tests import the chained instance and call
+  `route.request(...)` — no server, no port, no database; keep them to input
+  and auth boundaries. Component tests render with `@testing-library/react`.
 - New tables: extend `packages/db/src/schema.ts`, then run `bun run db:push`.
 - User-owned tables carry a `userId` foreign key, and every read, update and
   delete filters on the session user. A session proves who is calling, not
