@@ -99,13 +99,18 @@ jobs:
       #
       # Deliberately unconditional. Gating this on the action's own `published`
       # output hid the 0.2.1 drift: the action wrongly reported that nothing was
-      # published, which skipped the very check meant to catch that. On the
-      # pushes that only open the version pull request, package.json still holds
-      # the previous release, which has a tag — so the check simply passes.
-      - name: Verify the published version has a git tag
+      # published, which skipped the very check meant to catch that.
+      #
+      # The version is read from `origin/main`, not the working tree: on the push
+      # that only opens the version pull request, `changesets/action` runs
+      # `changeset version` and leaves package.json bumped to the *next*,
+      # unreleased version on a throwaway branch. Reading that value made the
+      # check demand a tag for a version nothing had published yet.
+      - name: Verify the released version has a git tag
         run: |
+          git fetch --tags --force origin main
+          git checkout origin/main -- package.json
           tag="$(node -p 'const p=require("./package.json");`${p.name}@${p.version}`')"
-          git fetch --tags origin
           if ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
             echo "::error::$tag is on npm but has no git tag. Recover with: bunx changeset tag && git push --tags, then gh release create $tag"
             exit 1
